@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, ScrollView, Text, TextInput, View, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import * as Clipboard from 'expo-clipboard';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-
 import { craftingStory } from '../../services/groqApi';
 
 export default function HomeScreen() {
+  const scrollViewRef = useRef<ScrollView>(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -38,6 +39,14 @@ export default function HomeScreen() {
         throw new Error("There was an error while crafting the story. Please try later.");
       }
       setStoryResult(result.toString());
+
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          x: 0, 
+          y: 732, 
+          animated: true
+        });
+      }, 500);
     } catch (error) {
       setErrorCraftingStory(error instanceof Error ? error.message : "There was an error while crafting the story. Please try later.");
     } finally {
@@ -109,7 +118,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
         {title({text: 'Create your story'})}
 
         <View style={styles.inputContainer}>
@@ -155,7 +164,7 @@ export default function HomeScreen() {
                   {storyResult}
                 </Text>
                 <View style={styles.resultActionContainer}> 
-                  <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } />
+                  <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync(storyResult)} />
                   <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } />
                 </View>
               </View>
