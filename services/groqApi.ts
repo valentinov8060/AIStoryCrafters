@@ -11,11 +11,7 @@ interface CraftingStoryArgs {
 
 const craftingStory = async (story: CraftingStoryArgs): Promise<string | null> => {
   try {
-    // Ambil API key dari Secure Store
-    const apiKey = await getSecureValue('valentinov');
-    if (!apiKey) {
-      throw new Error('API key not found.');
-    }
+    const apiKey = await getSecureValue(process.env.EXPO_PUBLIC_KEY_SECURE_STORE_API_KEY_GROQ as string);
 
     // Kirim permintaan ke API
     const response = await axios.request({

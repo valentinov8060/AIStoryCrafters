@@ -26,8 +26,7 @@ export async function getSecureValue(key: string): Promise<string | null> {
       console.log(`Value retrieved for key: ${key}`);
       return value;
     } else {
-      console.log(`No value found for key: ${key}`);
-      return null;
+      throw new Error(`Value not found for key: ${key}`);
     }
   } catch (error) {
     console.error('Error retrieving value from SecureStore:', error);
@@ -47,6 +46,3 @@ export async function deleteSecureValue(key: string) {
     console.error('Error deleting value from SecureStore:', error);
   }
 }
-
-
-saveSecureValue('valentinov', 'api_key_example');

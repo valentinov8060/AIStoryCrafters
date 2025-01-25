@@ -26,7 +26,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="saved"
         options={{
           title: 'Saved',
           tabBarIcon: ({ color }) => <FontAwesome5 name="save" size={22} color={color} />,

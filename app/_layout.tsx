@@ -1,21 +1,19 @@
-import React, { useEffect } from 'react';
+import React , { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
-import { saveSecureValue } from '../utils/secureStore';
+import { saveSecureValue } from '@/utils/secureStore';
+import { initializeDatabase } from '@/utils/storiesDatabase';
 
 export default function RootLayout() {
-  useEffect(() => {
-    const saveApiKey = async () => {
-      try {
-        await saveSecureValue('valentinov', process.env.EXPO_PUBLIC_API_KEY_GROQ as string);
-        console.log('API key saved during app initialization.');
-      } catch (error) {
-        console.error('Failed to save API key:', error);
-      }
-    };
-    saveApiKey();
-  })
+    useEffect(() => {
+      initializeDatabase();
+      saveSecureValue(
+        process.env.EXPO_PUBLIC_KEY_SECURE_STORE_API_KEY_GROQ as string, 
+        process.env.EXPO_PUBLIC_API_KEY_GROQ as string
+      );
+    }, []);
+  
   return (
     <>
       <Stack>

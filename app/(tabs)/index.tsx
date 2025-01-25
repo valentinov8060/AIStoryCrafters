@@ -8,7 +8,8 @@ import * as Clipboard from 'expo-clipboard';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { craftingStory } from '../../services/groqApi';
+import { craftingStory } from '@/services/groqApi';
+import { saveStoryToDatabase } from '@/utils/storiesDatabase';
 
 export default function HomeScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
@@ -24,6 +25,8 @@ export default function HomeScreen() {
   const [storyResult, setStoryResult] = useState("");
   const [isCraftingStoryLoading, setIsCraftingStoryLoading] = useState(false);
   const [errorCraftingStory, setErrorCraftingStory] = useState("");
+
+  const [popupSaveStoryVisible, setPopupSaveStoryVisible] = useState(false);
 
   const getStoryResult = async () => {
     setIsCraftingStoryLoading(true);
@@ -43,7 +46,7 @@ export default function HomeScreen() {
       setTimeout(() => {
         scrollViewRef.current?.scrollTo({
           x: 0, 
-          y: 732, 
+          y: 680, 
           animated: true
         });
       }, 500);
@@ -54,12 +57,24 @@ export default function HomeScreen() {
     } 
   }
 
+  const handleSaveStory = async () => {
+    try {
+      await saveStoryToDatabase(storySynopsisValue, storyResult);
+      setPopupSaveStoryVisible(true);
+      setTimeout(() => {
+        setPopupSaveStoryVisible(false); 
+      }, 2000);
+    } catch (error) {
+      console.error('Error saving story:', error);
+    }
+  };
+
   useEffect(() => {
   }, [storyResult]);
 
-  const title = ({text}: { text: string }): JSX.Element =>{
+  const header = ({text}: { text: string }): JSX.Element =>{
     return (
-      <Text style={[styles.title, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
+      <Text style={[styles.header, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
         {text}
       </Text>
     )
@@ -118,8 +133,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
+      {header({text: 'Create your story'})}
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
-        {title({text: 'Create your story'})}
 
         <View style={styles.inputContainer}>
           <Text style={[styles.inputLabel, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>Story synopsis:</Text>
@@ -131,7 +146,7 @@ export default function HomeScreen() {
                 color: isDarkMode ? Colors.dark.text : Colors.light.text 
               },
             ]}
-            placeholder="Type story synopsis here"
+            placeholder="Type your story synopsis here"
             placeholderTextColor={isDarkMode ? Colors.dark.text : Colors.light.text}
             multiline
             numberOfLines={8}
@@ -157,15 +172,15 @@ export default function HomeScreen() {
 
           { !!storyResult && (
             <>
-              {title({ text: 'Result' })}
+              {header({ text: 'Result' })}
 
               <View style={[styles.resultContainer, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
                 <Text style={[styles.resultText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
                   {storyResult}
                 </Text>
-                <View style={styles.resultActionContainer}> 
+                <View style={styles.resultAction}> 
                   <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync(storyResult)} />
-                  <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } />
+                  <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={handleSaveStory} />
                 </View>
               </View>
             </>
@@ -204,6 +219,22 @@ export default function HomeScreen() {
           </View>
         </Modal>
 
+        {/* Pop-up Notifikasi */}
+        <Modal
+          transparent
+          animationType="fade"
+          visible={popupSaveStoryVisible}
+          onRequestClose={() => setPopupSaveStoryVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
+              <Text style={[styles.modalText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
+                Story saved successfully!
+              </Text>
+            </View>
+          </View>
+        </Modal>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -215,14 +246,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
-  title: {
+  header: {
     width: '100%',
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 25,
+    paddingVertical: 10,
     borderBottomColor: 'gray',
-    borderBottomWidth: 2,
+    borderBottomWidth: 5,
   },
   inputContainer: {
     width: '100%',
@@ -273,6 +304,7 @@ const styles = StyleSheet.create({
   resultContainer: {
     width: '100%',
     borderRadius: 10,
+    marginTop: 10,
     paddingHorizontal: 10,
     paddingVertical: 10, 
   },
@@ -281,7 +313,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
   },
-  resultActionContainer: {
+  resultAction: {
     borderTopColor: 'gray',
     borderTopWidth: 2,
     paddingVertical: 10,
