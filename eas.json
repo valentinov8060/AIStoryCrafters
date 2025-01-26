@@ -5,18 +5,27 @@
   },
   "build": {
     "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+      "environment": "development",
+      "distribution": "internal",
+      "developmentClient": true
     },
     "preview": {
       "environment": "preview",
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_KEY_GROQ": "...",
+        "EXPO_PUBLIC_KEY_SECURE_STORE_API_KEY_GROQ": "..."
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_KEY_GROQ": "...",
+        "EXPO_PUBLIC_KEY_SECURE_STORE_API_KEY_GROQ": "..."
+      }
     }
   },
   "submit": {
