@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Modal } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -9,6 +9,7 @@ import * as Clipboard from 'expo-clipboard';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { ConfirmationModal, PopupNotificationModal } from '@/components/ui/Modal';
 import { getStoriesFromDatabase, deleteStoryFromDatabase } from '@/utils/storiesDatabase';
 
 export default function Saved() {
@@ -21,11 +22,25 @@ export default function Saved() {
   const [modalStory, setModalStory] = useState("");
   const [idForDelete, setIdForDelete] = useState<number>(0);
   const [modalDeleteStoryVisible, setModalDeleteStoryVisible] = useState(false);
-
+  const [popupDeleteStoryVisible, setPopupDeleteStoryVisible] = useState(false);
 
   const fetchStories = async () => {
     const storiesFromDatabase = await getStoriesFromDatabase();
     setStories(storiesFromDatabase);
+  };
+  const handleDeleteStory = async () => {
+    try {
+      await deleteStoryFromDatabase(idForDelete);
+      setModalDeleteStoryVisible(false);
+      setModalStory("");
+      await fetchStories();
+      setPopupDeleteStoryVisible(true);
+      setTimeout(() => {
+        setPopupDeleteStoryVisible(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error deleting story:', error);
+    }
   };
 
   useEffect(() => {
@@ -79,7 +94,7 @@ export default function Saved() {
               <Text style={[styles.modalStoryHeaderTitle, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
                 The Story
               </Text>
-  
+
               <Entypo name="dots-three-vertical" size={45} color={isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }/>            
             </View>
 
@@ -103,31 +118,14 @@ export default function Saved() {
           </View>
         </Modal>
 
-        <Modal
-          transparent
-          animationType="slide"
+        <ConfirmationModal
+          isDarkMode={isDarkMode}
           visible={modalDeleteStoryVisible}
-          onRequestClose={() => setModalDeleteStoryVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalDeleteStoryVisible(false)}>
-            <View style={styles.modalOverlay}>
-              <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-                <Text style={[styles.modalText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>Are you sure you want to delete this story?</Text>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: isDarkMode ? Colors.dark.tint : Colors.light.tint }]}
-                  onPress={async() => {
-                    await deleteStoryFromDatabase(idForDelete);
-                    setModalDeleteStoryVisible(false);
-                    setModalStory("");
-                    fetchStories();
-                  }}
-                >
-                  <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+          setVisible={setModalDeleteStoryVisible}
+          message="Are you sure you want to delete this story?"
+          onConfirm={handleDeleteStory}
+        />
+        <PopupNotificationModal isDarkMode={isDarkMode} visible={popupDeleteStoryVisible} setVisible={setPopupDeleteStoryVisible} message="Story deleted successfully!"/>
 
       </ScrollView>
     </SafeAreaView>
@@ -207,37 +205,5 @@ const styles = StyleSheet.create({
     flexDirection: "row", 
     justifyContent: "flex-end", 
     gap: 15,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    paddingHorizontal: 10,
-    paddingVertical: 20, 
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 55,
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  button: {
-    width: '100%',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginBottom: 20
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#ECEDEE',
   },
 });

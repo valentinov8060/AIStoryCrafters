@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, Text, TextInput, View, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { StyleSheet, ScrollView, Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
@@ -8,6 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { LoadingModal, ErrorModal, PopupNotificationModal } from '@/components/ui/Modal';
 import { craftingStory } from '@/services/groqApi';
 import { saveStoryToDatabase } from '@/utils/storiesDatabase';
 
@@ -56,7 +57,6 @@ export default function HomeScreen() {
       setIsCraftingStoryLoading(false);
     } 
   }
-
   const handleSaveStory = async () => {
     try {
       await saveStoryToDatabase(storySynopsisValue, storyResult);
@@ -156,11 +156,8 @@ export default function HomeScreen() {
         </View>
 
         {inputSlider({title: 'Story words length', minValue: 200, maxValue: 1000, step: 100, value: storyWordsLengthValue, setValue: setStoryWordsLengthValue})}
-
         {inputSlider({title: 'Story complexity', minValue: 1, maxValue: 10, step: 1, value: storyComplexityValue, setValue: setStoryComplexityValue})}
-
         {inputPicker({title: 'Story genre', value: storyGenreValue, setValue: setStoryGenreValue, options: ['Fantasy', 'Horror', 'Mystery', 'Romance', 'Science fiction', 'Comedy', 'Thriller', 'Drama', 'Realistic']})}
-
         {inputPicker({title: 'Story point of view', value: storyPointOfViewValue, setValue: setStoryPointOfViewValue, options: ['First person point of view', 'Third person point of view']})}
 
         <TouchableOpacity 
@@ -170,70 +167,25 @@ export default function HomeScreen() {
           <Text style={styles.buttonText}>Crafting Story</Text>
         </TouchableOpacity>
 
-          { !!storyResult && (
-            <>
-              {header({ text: 'Result' })}
+        { !!storyResult && (
+          <>
+            {header({ text: 'Result' })}
 
-              <View style={[styles.resultContainer, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-                <Text style={[styles.resultText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-                  {storyResult}
-                </Text>
-                <View style={styles.resultAction}> 
-                  <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync(storyResult)} />
-                  <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={handleSaveStory} />
-                </View>
-              </View>
-            </>
-          )}
-
-        {/* Loading modal */}
-        <Modal
-          visible={isCraftingStoryLoading}
-          transparent
-          animationType="fade"
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-              <ActivityIndicator size="large" color={isDarkMode ? Colors.dark.tint : Colors.light.tint} />
-              <Text style={[styles.modalText, {color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>Crafting your story...</Text>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Error modal */}
-        <Modal
-          visible={!! errorCraftingStory}
-          transparent
-          animationType="fade"
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-              <Text style={[styles.modalText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>{errorCraftingStory}</Text>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: isDarkMode ? Colors.dark.tint : Colors.light.tint }]}
-                onPress={() => setErrorCraftingStory('')}
-              >
-                <Text style={styles.buttonText}>Dismiss</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Pop-up Notifikasi */}
-        <Modal
-          transparent
-          animationType="fade"
-          visible={popupSaveStoryVisible}
-          onRequestClose={() => setPopupSaveStoryVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-              <Text style={[styles.modalText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-                Story saved successfully!
+            <View style={[styles.resultContainer, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
+              <Text style={[styles.resultText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
+                {storyResult}
               </Text>
+              <View style={styles.resultAction}> 
+                <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync(storyResult)} />
+                <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={handleSaveStory} />
+              </View>
             </View>
-          </View>
-        </Modal>
+          </>
+        )}
+
+        <LoadingModal isDarkMode={isDarkMode} visible={isCraftingStoryLoading} message="Crafting your story..." />
+        <ErrorModal isDarkMode={isDarkMode} message={errorCraftingStory} setMessage={setErrorCraftingStory} />
+        <PopupNotificationModal isDarkMode={isDarkMode} message="Story saved successfully!" visible={popupSaveStoryVisible} setVisible={setPopupSaveStoryVisible} />
 
       </ScrollView>
     </SafeAreaView>
@@ -320,25 +272,5 @@ const styles = StyleSheet.create({
     flexDirection: "row", 
     justifyContent: "flex-end", 
     gap: 15,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    paddingHorizontal: 10,
-    paddingVertical: 20, 
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 55,
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 10,
-    textAlign: 'center',
   },
 });
