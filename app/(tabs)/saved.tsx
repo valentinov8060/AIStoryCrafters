@@ -10,13 +10,14 @@ import * as Clipboard from 'expo-clipboard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ConfirmationModal, PopupNotificationModal } from '@/components/ui/Modal';
+import { Header } from '@/components/ui/Header';
 import { getStoriesFromDatabase, deleteStoryFromDatabase } from '@/utils/storiesDatabase';
 
 export default function Saved() {
-  const isFocused = useIsFocused();
-  const scrollViewRef = useRef<ScrollView>(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+  const isFocused = useIsFocused();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const [stories, setStories] = useState<any[]>([]);
   const [modalStory, setModalStory] = useState("");
@@ -51,31 +52,29 @@ export default function Saved() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
-      <Text style={[styles.header, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-        Your Saved Stories
-      </Text>
+      <Header isDarkMode={isDarkMode} text="Saved Stories" />
+
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
+        {
+          stories.map((story, index) => (
+            <TouchableOpacity
+              key={story.id}
+              onPress={() => {
+                setModalStory(story.story)
+                setIdForDelete(story.id)
+              }}
+              style={[styles.storyCard, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}
+            >
+              <Text style={[styles.storyCardHeader, { color: isDarkMode ? Colors.dark.icon : Colors.light.icon }]}>
+                Synopsis
+              </Text>
 
-      {
-        stories.map((story, index) => (
-          <TouchableOpacity
-            key={story.id}
-            onPress={() => {
-              setModalStory(story.story)
-              setIdForDelete(story.id)
-            }}
-            style={[styles.storyCard, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}
-          >
-            <Text style={[styles.storyCardHeader, { color: isDarkMode ? Colors.dark.icon : Colors.light.icon }]}>
-              Synopsis
-            </Text>
-
-            <Text style={[styles.storyCardContent, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-              {story.synopsis || "This story doesn't have synopsis."}
-            </Text>
-          </TouchableOpacity>
-        ))
-      }
+              <Text style={[styles.storyCardContent, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
+                {story.synopsis || "This story doesn't have synopsis."}
+              </Text>
+            </TouchableOpacity>
+          ))
+        }
 
         <Modal
           visible={!! modalStory}
@@ -98,23 +97,23 @@ export default function Saved() {
               <Entypo name="dots-three-vertical" size={45} color={isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }/>            
             </View>
 
-              <View style={[styles.modalStoryContentContainer,  {backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background}]}>
-                <ScrollView >
-                  <Text style={[styles.modalStoryContentText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-                    {modalStory || "This story doesn't have content."}                  
-                  </Text>
-                </ScrollView>
-                <View style={styles.modalStoryContentAction}> 
-                  <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync("test")} />
-                  <FontAwesome5 
-                    name="trash" 
-                    size={32} 
-                    color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } 
-                    onPress={async () => {
-                      setModalDeleteStoryVisible(true);
-                    }} />
-                </View>
+            <View style={[styles.modalStoryContentContainer,  {backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background}]}>
+              <ScrollView >
+                <Text style={[styles.modalStoryContentText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
+                  {modalStory || "This story doesn't have content."}                  
+                </Text>
+              </ScrollView>
+              <View style={styles.modalStoryContentAction}> 
+                <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync("test")} />
+                <FontAwesome5 
+                  name="trash" 
+                  size={32} 
+                  color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } 
+                  onPress={async () => {
+                    setModalDeleteStoryVisible(true);
+                  }} />
               </View>
+            </View>
           </View>
         </Modal>
 

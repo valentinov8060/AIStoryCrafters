@@ -9,6 +9,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { LoadingModal, ErrorModal, PopupNotificationModal } from '@/components/ui/Modal';
+import { Header } from '@/components/ui/Header';
 import { craftingStory } from '@/services/groqApi';
 import { saveStoryToDatabase } from '@/utils/storiesDatabase';
 
@@ -72,13 +73,6 @@ export default function HomeScreen() {
   useEffect(() => {
   }, [storyResult]);
 
-  const header = ({text}: { text: string }): JSX.Element =>{
-    return (
-      <Text style={[styles.header, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-        {text}
-      </Text>
-    )
-  }
   const inputSlider = ({title, minValue, maxValue, step, value, setValue}: { title: string, minValue: number, maxValue: number, step: number, value: number, setValue: (value: number) => void }): JSX.Element => {
     return (
       <View style={styles.inputContainer}>
@@ -133,7 +127,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
-      {header({text: 'Create your story'})}
+      <Header isDarkMode={isDarkMode} text="Create your story" />
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
 
         <View style={styles.inputContainer}>
@@ -169,7 +163,7 @@ export default function HomeScreen() {
 
         { !!storyResult && (
           <>
-            {header({ text: 'Result' })}
+            <Header isDarkMode={isDarkMode} text="Result" />
 
             <View style={[styles.resultContainer, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
               <Text style={[styles.resultText, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
