@@ -10,13 +10,15 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { LoadingModal, ErrorModal, PopupNotificationModal } from '@/components/ui/Modal';
 import { Header } from '@/components/ui/Header';
+import BannerAds from '@/components/ui/ads/Banner';
+import NativeComponentAds from '@/components/ui/ads/NativeAdvanced';
 import { craftingStory } from '@/services/groqApi';
 import { saveStoryToDatabase } from '@/utils/storiesDatabase';
 
 export default function HomeScreen() {
-  const scrollViewRef = useRef<ScrollView>(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const [storySynopsisValue, setStorySynopsisValue] = useState("");
   const [storyWordsLengthValue, setStoryWordsLengthValue] = useState(600);
@@ -127,6 +129,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
+      <BannerAds />
       <Header isDarkMode={isDarkMode} text="Create your story" />
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
 
@@ -173,6 +176,7 @@ export default function HomeScreen() {
                 <FontAwesome5 name="copy" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={async () =>  await Clipboard.setStringAsync(storyResult)} />
                 <FontAwesome5 name="save" size={32} color={ isDarkMode ? Colors.dark.tint : Colors.light.tint } onPress={handleSaveStory} />
               </View>
+              <NativeComponentAds />
             </View>
           </>
         )}

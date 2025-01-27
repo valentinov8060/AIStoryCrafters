@@ -11,13 +11,15 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { ConfirmationModal, PopupNotificationModal } from '@/components/ui/Modal';
 import { Header } from '@/components/ui/Header';
+import BannerAds from "@/components/ui/ads/Banner";
+import NativeComponentAds from "@/components/ui/ads/NativeAdvanced";
 import { getStoriesFromDatabase, deleteStoryFromDatabase } from '@/utils/storiesDatabase';
 
 export default function Saved() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-  const isFocused = useIsFocused();
   const scrollViewRef = useRef<ScrollView>(null);
+  const isFocused = useIsFocused();
 
   const [stories, setStories] = useState<any[]>([]);
   const [modalStory, setModalStory] = useState("");
@@ -52,6 +54,7 @@ export default function Saved() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundScreen : Colors.light.backgroundScreen }}>
+      <BannerAds />
       <Header isDarkMode={isDarkMode} text="Saved Stories" />
 
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
@@ -113,6 +116,7 @@ export default function Saved() {
                     setModalDeleteStoryVisible(true);
                   }} />
               </View>
+              <NativeComponentAds />
             </View>
           </View>
         </Modal>

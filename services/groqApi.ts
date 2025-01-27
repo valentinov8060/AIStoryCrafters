@@ -30,7 +30,7 @@ const craftingStory = async (story: CraftingStoryArgs): Promise<string | null> =
           },
           {
             role: 'user',
-            content: `Make a story about ${story.synopsis} with ${story.wordsLength} words, ${story.genre} genre, and ${story.pointOfView} point of view.`,
+            content: `Create a story based on the following synopsis: "${story.synopsis}". The story should match the language of the synopsis and adhere to the specified parameters: ${story.wordsLength} words, written in the ${story.genre} genre, and told from a ${story.pointOfView} perspective.`
           },
         ],
         temperature: story.complexity/10,
