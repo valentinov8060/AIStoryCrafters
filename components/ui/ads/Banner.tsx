@@ -8,7 +8,7 @@ export default function BannerAds() {
     <BannerAd
       unitId={adUnitId}
       size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-      onAdFailedToLoad={(error) => console.error("Ad failed to load: ", error)}
+      onAdFailedToLoad={(error) => console.error("Banner ad failed to load: ", error)}
     />
   )
 }
